@@ -8,12 +8,6 @@ Creating Develp Environment on Docker.
 
 open .env file and change address for your server or local machine.
 
-### Building docker-compose
-
-```
-$ docker-compose build
-```
-
 ### Executing docker-compose
 
 ```
