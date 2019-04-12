@@ -39,7 +39,7 @@ services:
       - ./gitea:/data
     ports:
       - 3020:3000
-      - 10022:22
+      - 10022:10022
     depends_on: 
       - mysql
 
@@ -73,14 +73,16 @@ services:
     volumes:
       - ./drone:/data
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - developnet
     environment: 
       - TZ=Japan
       - DRONE_GET_ALWAYS_AUTH=false
       - DRONE_RUNNER_CAPACITY=2
-      - DRONE_SERVER_HOST=${GITEA_SV_ADDR}:3080
+      - DRONE_SERVER_HOST=drone-server:80
       - DRONE_SERVER_PROTO=http
       - DRONE_TLS_AUTOCERT=false
-      - DRONE_GITEA_SERVER=http://${GITEA_SV_ADDR}:3000
+      - DRONE_GITEA_SERVER=http://gitea:3000
     restart: always
 
 volumes:
