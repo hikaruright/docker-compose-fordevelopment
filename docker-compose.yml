@@ -25,7 +25,7 @@ services:
 
   # Gitea : Git Server
   gitea:
-    image: gitea/gitea:1.7
+    image: gitea/gitea:latest
     container_name: gitea
     environment:
       - TZ=Japan
