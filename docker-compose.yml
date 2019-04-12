@@ -56,7 +56,7 @@ services:
       - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
     networks: 
       - developnet
-    command: -Dsonar.web.context=/sonarqube
+    # command: -Dsonar.web.context=/sonarqube
     ports:
       - 9000:9000
       - 9092:9092
