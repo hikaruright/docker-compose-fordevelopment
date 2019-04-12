@@ -1,4 +1,4 @@
-# Docker compose for Development with CI/CD
+# Docker compose for Development, with Drone CI and Sonarqube
 
 Creating Develp Environment on Docker.
 
