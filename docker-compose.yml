@@ -84,6 +84,14 @@ services:
       - DRONE_TLS_AUTOCERT=false
       - DRONE_GITEA_SERVER=http://gitea:3000
     restart: always
+  # Docker Repository
+  docker-repo:
+    image: registory:2.3.0
+    ports:
+      - 5000:5000
+    volumes:
+      - ./registory:/var/lib/registry
+    restart: always
 
 volumes:
   sonarqube_conf:
