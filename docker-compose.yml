@@ -86,7 +86,9 @@ services:
     restart: always
   # Docker Repository
   docker-repo:
-    image: registory:2.3.0
+    image: registry:2.3.0
+    networks:
+      - developnet
     ports:
       - 5000:5000
     volumes:
