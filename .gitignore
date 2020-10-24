@@ -1,0 +1,6 @@
+gitea/
+drone/
+registry/
+mysql/
+!mysql/init/
+!mysql/conf/

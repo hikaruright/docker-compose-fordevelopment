@@ -25,7 +25,7 @@ services:
 
   # Gitea : Git Server
   gitea:
-    image: gitea/gitea:latest
+    image: gitea/gitea:1.8.1
     container_name: gitea
     environment:
       - TZ=Japan
@@ -68,6 +68,7 @@ services:
   # Drone CI : CI/CD tool
   drone-server:
     image: drone/drone:1.0.0-rc.4
+    container_name: drone
     ports:
       - 3080:80
     volumes:
@@ -87,6 +88,7 @@ services:
   # Docker Repository
   docker-repo:
     image: registry:2.3.0
+    container_name: registry
     networks:
       - developnet
     ports:
