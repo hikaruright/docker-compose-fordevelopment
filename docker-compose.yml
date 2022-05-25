@@ -1,14 +1,10 @@
 version: "3"
 
-networks:
-  developnet:
-    driver: bridge
-
 services:
   # MySQL
-  mysql:
-    image: mysql:5.7.21
-    container_name: mysql
+  gitea_db:
+    image: mysql:8.0.29
+    container_name: gitea_db
     environment:
       - TZ=Japan
       - MYSQL_ROOT_PASSWORD=password123
@@ -20,53 +16,45 @@ services:
     volumes:
       - ./mysql/init:/docker-entrypoint-initdb.d
       - ./mysql/conf/:/etc/mysql/conf.d
-    networks: 
-      - developnet
 
   # Gitea : Git Server
   gitea:
-    image: gitea/gitea:1.8.1
-    container_name: gitea
+    image: gitea/gitea:1.16.8
+    container_name: gitea_app
     environment:
       - TZ=Japan
       - USER_UID=1000
       - USER_GID=1000
       - SSH_PORT=10022
     restart: always
-    networks:
-      - developnet
     volumes:
       - ./gitea:/data
     ports:
       - 3020:3000
       - 10022:10022
-    depends_on: 
-      - mysql
+    depends_on:
+      - gitea_db
 
   # Sonarqube : static analytics
   sonar_db:
     image: postgres:alpine
-    container_name: sonarqube_postgresql
+    container_name: sonar_db
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
       - POSTGRES_DB=sonar
-    networks:
-      - sonarnet
     volumes:
       - sonarqube_postgresql_data:/var/lib/postgresql/data
 
   sonarqube:
     image: sonarqube:8.2-community
-    container_name: sonarqube
+    container_name: sonar_app
     depends_on:
       - sonar_db
     environment:
       - SONARQUBE_JDBC_USERNAME=sonar
       - SONARQUBE_JDBC_PASSWORD=sonar
       - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar_db/sonar
-    networks:
-      - sonarnet
     ports:
       - 9000:9000
       - 9092:9092
@@ -74,39 +62,27 @@ services:
       - ./extensions:/opt/sonarqube/extensions
   
   # Drone CI : CI/CD tool
-  drone-server:
-    image: drone/drone:1.0.0-rc.4
-    container_name: drone
+  ci-server:
+    image: jenkins:2.60.3
+    container_name: jenkins_app
     ports:
-      - 3080:80
+      - 3080:8080
     volumes:
-      - ./drone:/data
+      - ./jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - developnet
     environment: 
       - TZ=Japan
-      - DRONE_GET_ALWAYS_AUTH=false
-      - DRONE_RUNNER_CAPACITY=2
-      - DRONE_SERVER_HOST=drone-server:80
-      - DRONE_SERVER_PROTO=http
-      - DRONE_TLS_AUTOCERT=false
-      - DRONE_GITEA_SERVER=http://gitea:3000
+
     restart: always
   # Docker Repository
   docker-repo:
     image: registry:2.3.0
     container_name: registry
-    networks:
-      - developnet
     ports:
       - 5000:5000
     volumes:
       - ./registory:/var/lib/registry
     restart: always
-
-networks:
-  sonarnet:
 
 volumes:
   sonarqube_conf:

@@ -4,3 +4,4 @@ registry/
 mysql/
 !mysql/init/
 !mysql/conf/
+jenkins/
