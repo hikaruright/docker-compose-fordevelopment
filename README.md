@@ -10,6 +10,6 @@ open .env file and change address for your server or local machine.
 
 ### Executing docker-compose
 
-```
+```shell
 $ docker-compose up -d
 ```

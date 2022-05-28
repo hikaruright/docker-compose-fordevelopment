@@ -1,8 +1,1 @@
-gitea/
-gitea_db/
-drone/
-registry/
-mysql/
-!mysql/init/
-!mysql/conf/
-jenkins/
+datas/

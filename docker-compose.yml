@@ -13,7 +13,7 @@ services:
       - POSTGRES_DB=gitea
     restart: always
     volumes:
-      - ./gitea_db:/var/lib/postgresql/data
+      - ./datas/gitea_db:/var/lib/postgresql/data
 
   # Gitea : Git Server
   gitea:
@@ -24,14 +24,27 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - SSH_PORT=10022
+      # Database Configuration
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=gitea_db:5432
       - GITEA__database__NAME=gitea
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=gitea
+      # Mailer Configs
+      - GITEA__mailer__ENABLED=true
+      - GITEA__mailer__FROM="postmaster@${SERVER_HOST}"
+      - GITEA__mailer__MAILER_TYPE=smtp
+      - GITEA__mailer__HOST="${SERVER_HOST}"
+      - GITEA__mailer__IS_TLS_ENABLED=true
+      - GITEA__mailer__USER=
+      - GITEA__mailer__PASSWD=
+      # Disable Register oneself, required create user by Administrator.
+      - GITEA__service__DISABLE_REGISTRATION=false
+      # Disable OpenID Sign up.
+      - GITEA__openid__ENABLE_OPENID_SIGNUP=true
     restart: always
     volumes:
-      - ./gitea:/data
+      - ./datas/gitea:/data
     ports:
       - 3020:3000
       - 10022:10022
@@ -48,7 +61,7 @@ services:
       - POSTGRES_PASSWORD=sonar
       # - POSTGRES_DB=sonar
     volumes:
-      - sonarqube_postgresql_data:/var/lib/postgresql/data
+      - ./datas/sonar_db/data:/var/lib/postgresql/data
 
   sonarqube:
     image: sonarqube:9.4.0-community
@@ -63,9 +76,9 @@ services:
       - 9000:9000
     restart: always
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
+      - ./datas/soanrqube/sonar_data:/opt/sonarqube/data
+      - ./datas/soanrqube/sonar_extensions:/opt/sonarqube/extensions
+      - ./datas/soanrqube/sonar_logs:/opt/sonarqube/logs
 
   # Jenkins
   ci-server:
@@ -75,7 +88,7 @@ services:
       - 3080:8080
       - 50000:50000
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - ./datas/jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=Japan
@@ -88,13 +101,11 @@ services:
     ports:
       - 5000:5000
     volumes:
-      - ./registory:/var/lib/registry
+      - ./datas/registory:/var/lib/registry
     restart: always
-
-volumes:
-  jenkins_home:
-  sonarqube_conf:
-  sonarqube_logs:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_postgresql_data:
+  mailserver:
+    image: mailhog/mailhog:latest
+    container_name: mailserver
+    ports:
+      - "8025:8025"
+      - "1025:1025"
