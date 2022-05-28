@@ -1,4 +1,5 @@
 gitea/
+gitea_db/
 drone/
 registry/
 mysql/

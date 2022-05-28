@@ -1,21 +1,19 @@
 version: "3"
 
 services:
-  # MySQL
   gitea_db:
-    image: mysql:8.0.29
+    image: postgres:alpine
     container_name: gitea_db
     environment:
       - TZ=Japan
-      - MYSQL_ROOT_PASSWORD=password123
+      #- POSTGRES_PASSWORD=password123
       # Settings for Gitea
-      - MYSQL_USER=gitea
-      - MYSQL_PASSWORD=gitea
-      - MYSQL_DATABASE=gitea
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
     restart: always
     volumes:
-      - ./mysql/init:/docker-entrypoint-initdb.d
-      - ./mysql/conf/:/etc/mysql/conf.d
+      - ./gitea_db:/var/lib/postgresql/data
 
   # Gitea : Git Server
   gitea:
@@ -26,6 +24,11 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - SSH_PORT=10022
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=gitea_db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
     restart: always
     volumes:
       - ./gitea:/data
@@ -39,38 +42,42 @@ services:
   sonar_db:
     image: postgres:alpine
     container_name: sonar_db
+    restart: always
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
-      - POSTGRES_DB=sonar
+      # - POSTGRES_DB=sonar
     volumes:
       - sonarqube_postgresql_data:/var/lib/postgresql/data
 
   sonarqube:
-    image: sonarqube:8.2-community
+    image: sonarqube:9.4.0-community
     container_name: sonar_app
     depends_on:
       - sonar_db
     environment:
-      - SONARQUBE_JDBC_USERNAME=sonar
-      - SONARQUBE_JDBC_PASSWORD=sonar
-      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar_db/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+      - SONAR_JDBC_URL=jdbc:postgresql://sonar_db:5432/sonar
     ports:
       - 9000:9000
-      - 9092:9092
+    restart: always
     volumes:
-      - ./extensions:/opt/sonarqube/extensions
-  
-  # Drone CI : CI/CD tool
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
+  # Jenkins
   ci-server:
-    image: jenkins:2.60.3
+    image: jenkins/jenkins:2.349-jdk11
     container_name: jenkins_app
     ports:
       - 3080:8080
+      - 50000:50000
     volumes:
-      - ./jenkins:/var/jenkins_home
+      - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-    environment: 
+    environment:
       - TZ=Japan
 
     restart: always
@@ -85,8 +92,9 @@ services:
     restart: always
 
 volumes:
+  jenkins_home:
   sonarqube_conf:
+  sonarqube_logs:
   sonarqube_data:
   sonarqube_extensions:
-  sonarqube_bundled-plugins:
   sonarqube_postgresql_data:

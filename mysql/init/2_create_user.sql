@@ -1,1 +1,0 @@
-CREATE USER 'sonar' IDENTIFIED BY 'sonar';
